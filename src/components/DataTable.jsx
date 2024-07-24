@@ -4,9 +4,7 @@ import { Table, Typography, Button } from "antd";
 const { Title } = Typography;
 
 const DataTable = ({
-  // metricsColumns,
   metricsData,
-  // columns,
   data,
   originalData,
   handleEdit,
@@ -28,7 +26,6 @@ const DataTable = ({
 
   const columns = [
     { title: "Date", dataIndex: "date", key: "date" },
-    { title: "File Name", dataIndex: "fileName", key: "fileName" },
     { title: "Direct Dial", dataIndex: "directDial", key: "directDial" },
     { title: "RPC VM", dataIndex: "rpcVm", key: "rpcVm" },
     { title: "Company IVR", dataIndex: "companyIvr", key: "companyIvr" },
@@ -51,6 +48,11 @@ const DataTable = ({
     return (
       <Table
         columns={columns.concat([
+          {
+            title: "File Name",
+            dataIndex: "fileName",
+            key: "fileName",
+          },
           {
             title: "Actions",
             dataIndex: "actions",
@@ -76,7 +78,7 @@ const DataTable = ({
 
   return (
     <>
-      <Title level={2}>Summery</Title>
+      <Title level={2}>Summary</Title>
       <Table
         columns={metricsColumns}
         dataSource={metricsData}

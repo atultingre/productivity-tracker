@@ -2,49 +2,95 @@ import React, { useState, useEffect } from "react";
 import { Button, Input, Modal, Form } from "antd";
 import { useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
-import moment from "moment";
 import Charts from "./components/Charts";
 import DataTable from "./components/DataTable";
 import ModalForm from "./components/ModalForm";
+import {
+  auth,
+  firestore,
+  signInWithEmailAndPassword,
+  signOut,
+} from "./firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import moment from "moment";
+import SignupForm from "./components/SignupForm";
 
 const App = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [data, setData] = useState([]);
   const [editingId, setEditingId] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [showLogin, setShowLogin] = useState(true);
+  const [user, setUser] = useState(null);
+  const [showLogin, setShowLogin] = useState(true); // Start with true to show login modal by
+  const [isSignupVisible, setIsSignupVisible] = useState(false);
+
   const [userCredentials, setUserCredentials] = useState({
-    employeeId: "",
+    email: "",
     password: "",
   });
 
   const { control, handleSubmit, reset, setValue, getValues } = useForm();
 
   useEffect(() => {
-    if (isLoggedIn) {
-      // Fetch user-specific data from localStorage (or Firebase in the future)
-      const storedData =
-        JSON.parse(localStorage.getItem(`hrData_${currentUser}`)) || [];
-      setData(storedData);
-    }
-  }, [isLoggedIn, currentUser]);
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      // If there's a token, verify it by checking the user's authentication state
+      const unsubscribe = auth.onAuthStateChanged(async (user) => {
+        if (user) {
+          setUser(user);
+          // Fetch and set user data after user has been authenticated
+          const userDoc = doc(firestore, "users", user.uid);
+          const userData = await getDoc(userDoc);
+          setData(userData.exists() ? userData.data().data || [] : []);
+          setShowLogin(false); // Hide login modal if user is authenticated
+        } else {
+          localStorage.removeItem("authToken"); // Clear token if user is not authenticated
+          setShowLogin(true); // Show login modal if no user is authenticated
+        }
+      });
 
-  const handleLogin = () => {
-    // Dummy login logic for now
-    if (userCredentials.employeeId && userCredentials.password) {
-      setCurrentUser(userCredentials.employeeId);
-      setIsLoggedIn(true);
-      setShowLogin(false);
+      return () => unsubscribe();
     } else {
-      alert("Please enter valid credentials");
+      setShowLogin(true); // Show login modal if no token in local storage
+    }
+  }, []);
+
+  const showSignupForm = () => {
+    setIsSignupVisible(true);
+  };
+
+  const closeSignupForm = () => {
+    setIsSignupVisible(false);
+  };
+  const handleLogin = async () => {
+    const { email, password } = userCredentials;
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+      const token = await user.getIdToken(); // Get the token
+      localStorage.setItem("authToken", token); // Store the token in local storage
+      setUser(user);
+      // Fetch and set user data after successful login
+      const userDoc = doc(firestore, "users", user.uid);
+      const userData = await getDoc(userDoc);
+      setData(userData.exists() ? userData.data().data || [] : []);
+      setShowLogin(false); // Hide login modal on successful login
+    } catch (error) {
+      alert(error.message);
     }
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setShowLogin(true);
-    setCurrentUser(null);
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      localStorage.removeItem("authToken"); // Remove the token from local storage
+      setShowLogin(true); // Show login modal on logout
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   const handleChangeCredentials = (e) => {
@@ -56,7 +102,7 @@ const App = () => {
     setIsModalVisible(true);
   };
 
-  const handleOk = () => {
+  const handleOk = async () => {
     const formData = getValues();
     const formattedData = {
       ...formData,
@@ -72,8 +118,13 @@ const App = () => {
     } else {
       newData.push(formattedData);
     }
+
     setData(newData);
-    localStorage.setItem(`hrData_${currentUser}`, JSON.stringify(newData));
+    if (user) {
+      const userDoc = doc(firestore, "users", user.uid);
+      await setDoc(userDoc, { data: newData });
+    }
+
     setIsModalVisible(false);
     reset();
     setEditingId(null);
@@ -98,10 +149,13 @@ const App = () => {
     }
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     const newData = data.filter((item) => item.id !== id);
     setData(newData);
-    localStorage.setItem(`hrData_${currentUser}`, JSON.stringify(newData));
+    if (user) {
+      const userDoc = doc(firestore, "users", user.uid);
+      await setDoc(userDoc, { data: newData });
+    }
   };
 
   const calculateMetrics = (startDate, endDate) => {
@@ -164,7 +218,7 @@ const App = () => {
     },
     {
       key: "weekly",
-      period: "Week",
+      period: "This Week",
       ...weeklyMetrics.totals,
       grandTotal: weeklyMetrics.grandTotal,
       percentage: weeklyMetrics.percentage.toFixed(2),
@@ -172,7 +226,7 @@ const App = () => {
     },
     {
       key: "monthly",
-      period: "Month",
+      period: "This Month",
       ...monthlyMetrics.totals,
       grandTotal: monthlyMetrics.grandTotal,
       percentage: monthlyMetrics.percentage.toFixed(2),
@@ -212,8 +266,11 @@ const App = () => {
   }));
 
   return (
-    <div>
-      {/* {showLogin ? (
+    <div className="p-10">
+      {/* <Button type="primary" onClick={showSignupForm}>
+        Sign Up
+      </Button> */}
+      {showLogin && (
         <Modal
           title="Login"
           open={showLogin}
@@ -222,10 +279,10 @@ const App = () => {
           okText="Login"
         >
           <Form layout="vertical">
-            <Form.Item label="Employee ID">
+            <Form.Item label="Email">
               <Input
-                name="employeeId"
-                value={userCredentials.employeeId}
+                name="email"
+                value={userCredentials.email}
                 onChange={handleChangeCredentials}
               />
             </Form.Item>
@@ -238,32 +295,33 @@ const App = () => {
             </Form.Item>
           </Form>
         </Modal>
-      ) : (
-        <> */}
-      <Button type="primary" onClick={showModal}>
-        Add File
-      </Button>
-      {/* <Button onClick={handleLogout} style={{ marginLeft: "10px" }}>
-        Logout
-      </Button> */}
-      <Charts chartData={chartData} />
-      <DataTable
-        metricsData={metricsData}
-        data={sortedData}
-        originalData={data}
-        handleEdit={handleEdit}
-        handleDelete={handleDelete}
-      />
-      <ModalForm
-        isModalVisible={isModalVisible}
-        handleOk={handleOk}
-        handleCancel={handleCancel}
-        control={control}
-        handleSubmit={handleSubmit}
-        reset={reset}
-      />
-      {/* </> */}
-      {/*  )} */}
+      )}
+      {/* <SignupForm isVisible={isSignupVisible} onClose={closeSignupForm} /> */}
+      <>
+        <Button type="primary" onClick={showModal}>
+          Add File
+        </Button>
+        <Button onClick={handleLogout} style={{ marginLeft: "10px" }}>
+          Logout
+        </Button>
+        <Charts chartData={chartData} />
+        <DataTable
+          metricsData={metricsData}
+          data={sortedData}
+          originalData={data}
+          handleEdit={handleEdit}
+          handleDelete={handleDelete}
+        />
+        <ModalForm
+          isModalVisible={isModalVisible}
+          handleOk={handleOk}
+          handleCancel={handleCancel}
+          control={control}
+          handleSubmit={handleSubmit}
+          reset={reset}
+        />
+      </>
+      )}
     </div>
   );
 };
