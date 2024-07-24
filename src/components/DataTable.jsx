@@ -76,14 +76,14 @@ const DataTable = ({
 
   return (
     <>
-      <Title level={2}>Metrics Table</Title>
+      <Title level={2}>Summery</Title>
       <Table
         columns={metricsColumns}
         dataSource={metricsData}
         pagination={false}
         rowKey="key"
       />
-      <Title level={2}>Grouped Data Table</Title>
+      <Title level={2}>Records</Title>
       <Table
         columns={columns}
         dataSource={data}

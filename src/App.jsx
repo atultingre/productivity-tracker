@@ -164,7 +164,7 @@ const App = () => {
     },
     {
       key: "weekly",
-      period: "This Week",
+      period: "Week",
       ...weeklyMetrics.totals,
       grandTotal: weeklyMetrics.grandTotal,
       percentage: weeklyMetrics.percentage.toFixed(2),
@@ -172,7 +172,7 @@ const App = () => {
     },
     {
       key: "monthly",
-      period: "This Month",
+      period: "Month",
       ...monthlyMetrics.totals,
       grandTotal: monthlyMetrics.grandTotal,
       percentage: monthlyMetrics.percentage.toFixed(2),

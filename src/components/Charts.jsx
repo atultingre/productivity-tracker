@@ -1,9 +1,18 @@
-import React from 'react';
+import React from "react";
 import {
-  LineChart, Line, XAxis, YAxis, Tooltip, Legend, CartesianGrid,
-  AreaChart, Area, BarChart, Bar
-} from 'recharts';
-import { Typography } from 'antd';
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  CartesianGrid,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+} from "recharts";
+import { Typography } from "antd";
 
 const { Title } = Typography;
 
@@ -38,7 +47,7 @@ const Charts = ({ chartData }) => (
       </AreaChart>
     </div> */}
     <div style={{ marginBottom: 16 }}>
-      <Title level={5}>Bar Chart</Title>
+      <Title level={5}>Overview</Title>
       <BarChart width={800} height={400} data={chartData}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="period" />
