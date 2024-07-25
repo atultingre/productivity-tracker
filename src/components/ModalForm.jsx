@@ -1,69 +1,78 @@
-import React from 'react';
-import { Modal, Button, Form as AntForm, Input } from 'antd';
-import { Controller } from 'react-hook-form';
+import { Modal, Button, Form, Input } from "antd";
+import { useAppContext } from "../contexts/AppContext";
+import { useEffect } from "react";
 
-const ModalForm = ({ isModalVisible, handleOk, handleCancel, control, handleSubmit, reset }) => (
-  <Modal
-    title="HR Form"
-    open={isModalVisible}
-    onCancel={handleCancel}
-    footer={null}
-  >
-    <AntForm layout="vertical" onFinish={handleSubmit(handleOk)}>
-      <AntForm.Item label="Date">
-        <Controller
+const ModalForm = ({ handleOk, initialValues }) => {
+  const { isModalVisible, handleCancel } = useAppContext();
+  const [form] = Form.useForm();
+
+  useEffect(() => {
+    if (isModalVisible && initialValues) {
+      form.setFieldsValue(initialValues);
+    }
+  }, [isModalVisible, initialValues]);
+
+  const onFinish = (values) => {
+    handleOk(values);
+    form.resetFields();
+  };
+
+  return (
+    <Modal
+      title="CV File Form"
+      open={isModalVisible}
+      onCancel={handleCancel}
+      footer={null}
+    >
+      <Form form={form} layout="vertical" onFinish={onFinish}>
+        <Form.Item
+          label="Date"
           name="date"
-          control={control}
-          render={({ field }) => (
-            <Input
-              type="date"
-              {...field}
-              value={field.value || ""}
-              onChange={(e) => field.onChange(e.target.value)}
-            />
-          )}
-        />
-      </AntForm.Item>
-      <AntForm.Item label="File Name">
-        <Controller
+          rules={[{ required: true, message: "Date is required" }]}
+        >
+          <Input type="date" />
+        </Form.Item>
+        <Form.Item
+          label="File Name"
           name="fileName"
-          control={control}
-          render={({ field }) => <Input {...field} />}
-        />
-      </AntForm.Item>
-      <AntForm.Item label="Direct Dial">
-        <Controller
+          rules={[{ required: true, message: "File Name is required" }]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          label="Direct Dial"
           name="directDial"
-          control={control}
-          render={({ field }) => <Input {...field} />}
-        />
-      </AntForm.Item>
-      <AntForm.Item label="RPC VM">
-        <Controller
+          rules={[{ required: true, message: "Direct Dial is required" }]}
+        >
+          <Input type="number" />
+        </Form.Item>
+        <Form.Item
+          label="RPC VM"
           name="rpcVm"
-          control={control}
-          render={({ field }) => <Input {...field} />}
-        />
-      </AntForm.Item>
-      <AntForm.Item label="Company IVR">
-        <Controller
+          rules={[{ required: true, message: "RPC VM is required" }]}
+        >
+          <Input type="number" />
+        </Form.Item>
+        <Form.Item
+          label="Company IVR"
           name="companyIvr"
-          control={control}
-          render={({ field }) => <Input {...field} />}
-        />
-      </AntForm.Item>
-      <AntForm.Item label="Not Verified">
-        <Controller
+          rules={[{ required: true, message: "Company IVR is required" }]}
+        >
+          <Input type="number" />
+        </Form.Item>
+        <Form.Item
+          label="Not Verified"
           name="notVerified"
-          control={control}
-          render={({ field }) => <Input {...field} />}
-        />
-      </AntForm.Item>
-      <Button type="primary" htmlType="submit">
-        Submit
-      </Button>
-    </AntForm>
-  </Modal>
-);
+          rules={[{ required: true, message: "Not Verified is required" }]}
+        >
+          <Input type="number" />
+        </Form.Item>
+        <Button type="primary" htmlType="submit" className="w-full">
+          Submit
+        </Button>
+      </Form>
+    </Modal>
+  );
+};
 
 export default ModalForm;
