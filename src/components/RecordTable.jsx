@@ -1,29 +1,44 @@
-import { useState } from "react";
-import { Table, Typography, Button } from "antd";
+import { useState, useMemo } from "react";
+import { Table, Typography, Button, DatePicker } from "antd";
+import moment from 'moment';
+
 const { Title } = Typography;
 
 const RecordTable = ({ data, originalData, handleEdit, handleDelete }) => {
-  const [expandedRowKeys, setExpandedRowKeys] = useState([]);
+  // Utility function to get current date in YYYY-MM format
+  const getCurrentMonthYear = () => {
+    return moment().format('YYYY-MM');
+  };
 
   // Utility function to format date to dd-mm-yyyy
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
   };
 
-  // Transform the date format in data
-  const transformedData = data.map((item) => ({
-    ...item,
-    date: formatDate(item.date),
-  }));
+  // Function to filter data based on the selected month
+  const filterDataByMonth = (data, selectedMonth) => {
+    return data.filter((item) => {
+      const itemDate = new Date(item.date);
+      const itemMonth = String(itemDate.getMonth() + 1).padStart(2, "0");
+      const itemYear = itemDate.getFullYear();
+      return `${itemYear}-${itemMonth}` === selectedMonth;
+    });
+  };
 
-  const transformedOriginalData = originalData.map((item) => ({
+  const [expandedRowKeys, setExpandedRowKeys] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState(getCurrentMonthYear());
+
+  // Transform the date format in data
+  const transformedData = useMemo(() => filterDataByMonth(data, selectedMonth), [data, selectedMonth]);
+
+  const transformedOriginalData = useMemo(() => originalData.map((item) => ({
     ...item,
     date: formatDate(item.date),
-  }));
+  })), [originalData]);
 
   const columns = [
     { title: "Date", dataIndex: "date", key: "1" },
@@ -107,7 +122,24 @@ const RecordTable = ({ data, originalData, handleEdit, handleDelete }) => {
 
   return (
     <>
-      <Title level={2}>Records</Title>
+      <div className="flex items-center justify-between w-full">
+        <div>
+          <Title level={2}>Records</Title>
+        </div>
+        <div>
+          <DatePicker
+            size="default"
+            picker="month"
+            allowClear={true}
+            value={moment(selectedMonth, 'YYYY-MM')}
+            onChange={(date) => {
+              if (date) {
+                setSelectedMonth(date.format('YYYY-MM'));
+              }
+            }}
+          />
+        </div>
+      </div>
       <Table
         columns={columns}
         dataSource={transformedData}
