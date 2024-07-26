@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { Table, Typography, Button, DatePicker, Modal } from "antd";
 import moment from "moment";
 import { useAppContext } from "../contexts/AppContext";
+import { v4 as uuidv4 } from "uuid";
+
 const { Title } = Typography;
 
 const DataTable = ({
@@ -41,6 +43,7 @@ const DataTable = ({
       filterDataByMonth(data, selectedMonth).map((item) => ({
         ...item,
         date: formatDate(item.date),
+        key: item.id || uuidv4(), // Ensure each item has a unique key
       })),
     [data, selectedMonth]
   );
@@ -50,6 +53,7 @@ const DataTable = ({
       originalData.map((item) => ({
         ...item,
         date: formatDate(item.date),
+        key: item.id || uuidv4(),
       })),
     [originalData]
   );
@@ -90,13 +94,13 @@ const DataTable = ({
   ];
 
   const columns = [
-    { title: "Date", dataIndex: "date", key: "1" },
+    { title: "Date", dataIndex: "date", key: "date" },
     {
       title: "Direct Dial",
       dataIndex: "directDial",
       key: "directDial",
     },
-    { title: "RPC VM", dataIndex: "rpcVm", key: "2" },
+    { title: "RPC VM", dataIndex: "rpcVm", key: "rpcVm" },
     {
       title: "Company IVR",
       dataIndex: "companyIvr",
@@ -110,7 +114,7 @@ const DataTable = ({
   ];
 
   const handleExpand = (expanded, record) => {
-    const newExpandedRowKeys = expanded ? [record.id] : [];
+    const newExpandedRowKeys = expanded ? [record.key] : [];
     setExpandedRowKeys(newExpandedRowKeys);
   };
 
@@ -150,13 +154,13 @@ const DataTable = ({
               key: "actions",
               render: (_, record) => (
                 <>
-                  <Button type="link" onClick={() => handleEdit(record.id)}>
+                  <Button type="link" onClick={() => handleEdit(record.key)}>
                     Edit
                   </Button>
                   <Button
                     type="link"
                     onClick={() => {
-                      setDeleteRecordId(record.id);
+                      setDeleteRecordId(record.key);
                       setConfirmOpen(true);
                     }}
                   >
@@ -194,7 +198,7 @@ const DataTable = ({
         columns={metricsColumns}
         dataSource={metricsData}
         pagination={false}
-        rowKey="id"
+        rowKey="key"
         scroll={{
           x: 300,
         }}
@@ -239,7 +243,6 @@ const DataTable = ({
         onOk={confirmDelete}
         onCancel={() => setConfirmOpen(false)}
         okText="Delete"
-        // cancelText="Cancel"
         okButtonProps={{ danger: true }}
       >
         <p>Are you sure you want to delete this record? This action cannot be undone.</p>
