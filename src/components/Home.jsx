@@ -7,6 +7,7 @@ import { auth, firestore } from "../firebase";
 import Charts from "./Charts";
 import DataTable from "./DataTable";
 import ModalForm from "./ModalForm";
+import { notification } from 'antd';
 
 const Home = () => {
   const {
@@ -25,22 +26,28 @@ const Home = () => {
   const [initialValues, setInitialValues] = useState({});
 
   useEffect(() => {
-      const unsubscribe = auth.onAuthStateChanged(async (user) => {
-        if (user) {
-          setUser(user);
-          const userDoc = doc(firestore, "users", user.uid);
-          const userData = await getDoc(userDoc);
-          setData(userData.exists() ? userData.data().data || [] : []);
-          setShowLogin(false);
-        } else {
-          localStorage.removeItem("authToken");
-          setShowLogin(true);
-        }
-      });
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        setUser(user);
+        const userDoc = doc(firestore, "users", user.uid);
+        const userData = await getDoc(userDoc);
+        setData(userData.exists() ? userData.data().data || [] : []);
+        setShowLogin(false);
+      } else {
+        localStorage.removeItem("authToken");
+        setShowLogin(true);
+      }
+    });
 
-      return () => unsubscribe();
-
+    return () => unsubscribe();
   }, []);
+
+  const openNotification = (type, message) => {
+    notification[type]({
+      message: message,
+      description: '',
+    });
+  };
 
   const handleOk = async (formData) => {
     const formattedData = {
@@ -54,8 +61,10 @@ const Home = () => {
       newData = newData.map((item) =>
         item.id === editingId ? formattedData : item
       );
+      openNotification('success', 'File updated successfully');
     } else {
       newData.push(formattedData);
+      openNotification('success', 'File added successfully');
     }
 
     setData(newData);
@@ -87,6 +96,7 @@ const Home = () => {
       const userDoc = doc(firestore, "users", user.uid);
       await setDoc(userDoc, { data: newData });
     }
+    openNotification('success', 'File deleted successfully');
   };
 
   const calculateMetrics = (startDate, endDate) => {

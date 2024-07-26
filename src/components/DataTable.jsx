@@ -3,6 +3,7 @@ import { Table, Typography, Button, DatePicker, Modal } from "antd";
 import moment from "moment";
 import { useAppContext } from "../contexts/AppContext";
 import { v4 as uuidv4 } from "uuid";
+import { DeleteFilled, DeleteOutlined, DeleteTwoTone, EditFilled } from "@ant-design/icons";
 
 const { Title } = Typography;
 
@@ -14,7 +15,9 @@ const DataTable = ({
   handleDelete,
 }) => {
   const [expandedRowKeys, setExpandedRowKeys] = useState([]);
-  const [selectedMonth, setSelectedMonth] = useState(moment().format("YYYY-MM"));
+  const [selectedMonth, setSelectedMonth] = useState(
+    moment().format("YYYY-MM")
+  );
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleteRecordId, setDeleteRecordId] = useState(null);
 
@@ -155,7 +158,7 @@ const DataTable = ({
               render: (_, record) => (
                 <>
                   <Button type="link" onClick={() => handleEdit(record.key)}>
-                    Edit
+                  <EditFilled className="text-[blue]"/>
                   </Button>
                   <Button
                     type="link"
@@ -164,7 +167,7 @@ const DataTable = ({
                       setConfirmOpen(true);
                     }}
                   >
-                    Delete
+                    <DeleteFilled className="text-[red]" />
                   </Button>
                 </>
               ),
@@ -245,7 +248,10 @@ const DataTable = ({
         okText="Delete"
         okButtonProps={{ danger: true }}
       >
-        <p>Are you sure you want to delete this record? This action cannot be undone.</p>
+        <p>
+          Are you sure you want to delete this record? This action cannot be
+          undone.
+        </p>
       </Modal>
     </>
   );
