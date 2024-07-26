@@ -1,7 +1,12 @@
 // firebase.js
 
 import { initializeApp } from "firebase/app";
-import { getAuth, signInWithEmailAndPassword as signInWithEmailAndPasswordModular, signOut as signOutModular } from "firebase/auth";
+import {
+  getAuth,
+  signInWithEmailAndPassword as signInWithEmailAndPasswordModular,
+  signOut as signOutModular,
+  createUserWithEmailAndPassword,
+} from "firebase/auth";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -17,4 +22,10 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const firestore = getFirestore(app);
 
-export { auth, firestore, signInWithEmailAndPasswordModular as signInWithEmailAndPassword, signOutModular as signOut };
+export {
+  auth,
+  firestore,
+  signInWithEmailAndPasswordModular as signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOutModular as signOut,
+};

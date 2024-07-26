@@ -3,7 +3,7 @@ import { Button, Layout } from "antd";
 import { signOut } from "firebase/auth";
 import { auth } from "../../firebase";
 import { useAppContext } from "../../contexts/AppContext";
-import Login from "../Auth/Login";
+import AuthModal from "../Auth/AuthModal";
 const { Header } = Layout;
 
 const TopBar = () => {
@@ -67,7 +67,7 @@ const TopBar = () => {
               Login
             </Button>
           )}
-          {showLogin && !token && <Login />}
+          {showLogin && !token && <AuthModal />}
         </div>
       </div>
     </Header>

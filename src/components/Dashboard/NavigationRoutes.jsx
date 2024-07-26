@@ -4,6 +4,7 @@ import Home from "../Home";
 import { useAppContext } from "../../contexts/AppContext";
 import { Button } from "antd";
 import Login from "../Auth/Login";
+import SignupForm from "../Auth/SignupForm";
 
 const NavigationRoutes = () => {
   const { borderRadiusLG, colorBgContainer, showModal, token } =
@@ -33,7 +34,6 @@ const NavigationRoutes = () => {
       <div className="py-5">
         <Routes>
           <Route path="/" exact element={<Home />} />
-          <Route path="/login" exact element={<Login />} />
         </Routes>
       </div>
     </Content>
