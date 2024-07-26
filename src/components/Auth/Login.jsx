@@ -6,7 +6,8 @@ import { doc, getDoc } from "firebase/firestore";
 import { useAppContext } from "../../contexts/AppContext";
 
 const Login = () => {
-  const { setData, setShowLogin, setUser,showLogin } = useAppContext();
+  const { setData, setShowLogin, setUser, showLogin, setToken } =
+    useAppContext();
   const [userCredentials, setUserCredentials] = useState({
     email: "",
     password: "",
@@ -27,6 +28,7 @@ const Login = () => {
       );
       const user = userCredential.user;
       const token = await user.getIdToken(); // Get the token
+      setToken(token);
       localStorage.setItem("authToken", token); // Store the token in local storage
       setUser(user);
       // Fetch and set user data after successful login

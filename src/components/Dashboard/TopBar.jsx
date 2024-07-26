@@ -3,19 +3,32 @@ import { Button, Layout } from "antd";
 import { signOut } from "firebase/auth";
 import { auth } from "../../firebase";
 import { useAppContext } from "../../contexts/AppContext";
+import Login from "../Auth/Login";
 const { Header } = Layout;
 
 const TopBar = () => {
-  const { collapsed, setCollapsed, colorBgContainer, token, handleLogin } =
-    useAppContext();
+  const {
+    collapsed,
+    setCollapsed,
+    colorBgContainer,
+    token,
+    setShowLogin,
+    showLogin,
+    setToken,
+  } = useAppContext();
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
       localStorage.removeItem("authToken");
+      setToken(null);
     } catch (error) {
       alert(error.message);
     }
+  };
+
+  const handleLogin = () => {
+    setShowLogin(true);
   };
 
   return (
@@ -54,6 +67,7 @@ const TopBar = () => {
               Login
             </Button>
           )}
+          {showLogin && !token && <Login />}
         </div>
       </div>
     </Header>

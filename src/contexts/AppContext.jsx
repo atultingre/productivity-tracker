@@ -30,10 +30,6 @@ export const AppProvider = ({ children }) => {
     setEditingId(null);
   };
 
-  const handleLogin = () => {
-    setShowLogin(true);
-  };
-
   const value = {
     collapsed,
     setCollapsed,
@@ -52,7 +48,7 @@ export const AppProvider = ({ children }) => {
     showModal,
     handleCancel,
     token,
-    handleLogin,
+    setToken,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
