@@ -3,7 +3,7 @@ import { Table, Typography, Button, DatePicker, Modal } from "antd";
 import moment from "moment";
 import { useAppContext } from "../contexts/AppContext";
 import { v4 as uuidv4 } from "uuid";
-import { DeleteFilled, DeleteOutlined, DeleteTwoTone, EditFilled } from "@ant-design/icons";
+import { DeleteFilled, EditFilled } from "@ant-design/icons";
 
 const { Title } = Typography;
 
@@ -97,24 +97,48 @@ const DataTable = ({
   ];
 
   const columns = [
-    { title: "Date", dataIndex: "date", key: "date" },
+    {
+      title: "Date",
+      dataIndex: "date",
+      key: "date",
+    },
     {
       title: "Direct Dial",
       dataIndex: "directDial",
       key: "directDial",
+      sorter: (a, b) => a.directDial - b.directDial,
     },
-    { title: "RPC VM", dataIndex: "rpcVm", key: "rpcVm" },
+    {
+      title: "RPC VM",
+      dataIndex: "rpcVm",
+      key: "rpcVm",
+      sorter: (a, b) => a.rpcVm - b.rpcVm,
+    },
     {
       title: "Company IVR",
       dataIndex: "companyIvr",
       key: "companyIvr",
+      sorter: (a, b) => a.companyIvr - b.companyIvr,
     },
     {
       title: "Not Verified",
       dataIndex: "notVerified",
       key: "notVerified",
+      sorter: (a, b) => a.notVerified - b.notVerified,
     },
   ];
+
+  // Function to assign colors to rows based on data
+  const getRowClassName = (record) => {
+    // Customize this logic as needed
+    if (record.directDial + record.rpcVm > 50) {
+      return 'bg-green-100'; // Tailwind class for light green background
+    } else if (record.directDial + record.rpcVm < 50) {
+      return 'bg-red-100'; // Tailwind class for light red background
+    } else {
+      return '';
+    }
+  };
 
   const handleExpand = (expanded, record) => {
     const newExpandedRowKeys = expanded ? [record.key] : [];
@@ -158,7 +182,7 @@ const DataTable = ({
               render: (_, record) => (
                 <>
                   <Button type="link" onClick={() => handleEdit(record.key)}>
-                  <EditFilled className="text-[blue]"/>
+                    <EditFilled className="text-[blue]" />
                   </Button>
                   <Button
                     type="link"
@@ -237,6 +261,7 @@ const DataTable = ({
         scroll={{
           x: 240,
         }}
+        rowClassName={getRowClassName} // Apply custom row class
       />
 
       {/* Confirmation Dialog */}
