@@ -237,7 +237,9 @@ const DataTable = ({
         title="Confirm Delete"
         open={confirmOpen}
         onOk={confirmDelete}
+        onCancel={() => setConfirmOpen(false)}
         okText="Delete"
+        // cancelText="Cancel"
         okButtonProps={{ danger: true }}
       >
         <p>Are you sure you want to delete this record? This action cannot be undone.</p>
