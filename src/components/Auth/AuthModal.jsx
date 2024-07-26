@@ -110,7 +110,7 @@ const AuthModal = () => {
         className="relative z-10"
       >
         <div
-          className="fixed inset-0 bg-gray-500 bg-opacity-70 transition-opacity"
+          className="fixed inset-0 bg-gray-500 bg-opacity-100 transition-opacity"
           aria-hidden="true"
         />
         <div className="fixed inset-0 flex items-center justify-center p-4 text-center">
