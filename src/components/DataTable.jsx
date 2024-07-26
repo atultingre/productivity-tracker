@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { Table, Typography, Button, DatePicker } from "antd";
+import { Table, Typography, Button, DatePicker, Modal } from "antd";
 import moment from "moment";
+import { useAppContext } from "../contexts/AppContext";
 const { Title } = Typography;
 
 const DataTable = ({
@@ -10,12 +11,14 @@ const DataTable = ({
   handleEdit,
   handleDelete,
 }) => {
-  // Utility function to get current date in YYYY-MM format
-  const getCurrentMonthYear = () => {
-    return moment().format("YYYY-MM");
-  };
+  const [expandedRowKeys, setExpandedRowKeys] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState(moment().format("YYYY-MM"));
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteRecordId, setDeleteRecordId] = useState(null);
 
-  // Utility function to format date to dd-mm-yyyy
+  const { token } = useAppContext();
+
+  // Utility functions
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
     const day = String(date.getDate()).padStart(2, "0");
@@ -24,7 +27,6 @@ const DataTable = ({
     return `${day}-${month}-${year}`;
   };
 
-  // Function to filter data based on the selected month
   const filterDataByMonth = (data, selectedMonth) => {
     return data.filter((item) => {
       const itemDate = new Date(item.date);
@@ -34,10 +36,6 @@ const DataTable = ({
     });
   };
 
-  const [expandedRowKeys, setExpandedRowKeys] = useState([]);
-  const [selectedMonth, setSelectedMonth] = useState(getCurrentMonthYear());
-
-  // Transform the date format in data
   const transformedData = useMemo(
     () =>
       filterDataByMonth(data, selectedMonth).map((item) => ({
@@ -144,21 +142,31 @@ const DataTable = ({
         dataIndex: "notVerified",
         key: "notVerified",
       },
-      {
-        title: "Actions",
-        dataIndex: "actions",
-        key: "actions",
-        render: (_, record) => (
-          <>
-            <Button type="link" onClick={() => handleEdit(record.id)}>
-              Edit
-            </Button>
-            <Button type="link" onClick={() => handleDelete(record.id)}>
-              Delete
-            </Button>
-          </>
-        ),
-      },
+      ...(token
+        ? [
+            {
+              title: "Actions",
+              dataIndex: "actions",
+              key: "actions",
+              render: (_, record) => (
+                <>
+                  <Button type="link" onClick={() => handleEdit(record.id)}>
+                    Edit
+                  </Button>
+                  <Button
+                    type="link"
+                    onClick={() => {
+                      setDeleteRecordId(record.id);
+                      setConfirmOpen(true);
+                    }}
+                  >
+                    Delete
+                  </Button>
+                </>
+              ),
+            },
+          ]
+        : []),
     ];
 
     return (
@@ -169,6 +177,14 @@ const DataTable = ({
         rowKey="key"
       />
     );
+  };
+
+  const confirmDelete = () => {
+    if (deleteRecordId !== null) {
+      handleDelete(deleteRecordId);
+    }
+    setConfirmOpen(false);
+    setDeleteRecordId(null);
   };
 
   return (
@@ -215,6 +231,17 @@ const DataTable = ({
           x: 240,
         }}
       />
+
+      {/* Confirmation Dialog */}
+      <Modal
+        title="Confirm Delete"
+        open={confirmOpen}
+        onOk={confirmDelete}
+        okText="Delete"
+        okButtonProps={{ danger: true }}
+      >
+        <p>Are you sure you want to delete this record? This action cannot be undone.</p>
+      </Modal>
     </>
   );
 };
